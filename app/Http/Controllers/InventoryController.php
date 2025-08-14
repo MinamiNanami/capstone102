@@ -18,7 +18,7 @@ class InventoryController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:255|unique:inventory_items,name',
             'category' => 'required|string',
             'quantity' => 'required|integer',
             'price' => 'required|numeric',

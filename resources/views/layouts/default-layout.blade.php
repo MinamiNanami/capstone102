@@ -7,8 +7,10 @@
     <title>
         Vettrack
     </title>
+    <script src="{{ asset('js/script.js') }}"></script>
     <script src="{{ asset('js/tailwind.js') }}"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -35,6 +37,11 @@
             opacity: 0;
             transform: translateY(-10px);
             transition: opacity 0.3s, transform 0.3s;
+        }
+
+        html,
+        body {
+            overflow-y: hidden;
         }
     </style>
 </head>
@@ -150,7 +157,7 @@
             </div>
         </div>
         <!-- Logout Modal -->
-        <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden" id="logoutModal">
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 hidden" id="logoutModal">
             <div class="bg-white p-6 rounded-md shadow-md">
                 <h2 class="text-xl font-bold mb-4">
                     Are you sure you want to log out?
@@ -161,9 +168,16 @@
                         onclick="closeLogoutModal()">
                         Cancel
                     </button>
-                    <button class="bg-red-500 text-black px-4 py-2 rounded hover:bg-red-400" onclick="logout()">
+                    <!-- Log Out Button -->
+                    <button class="bg-red-500 text-black px-4 py-2 rounded hover:bg-red-400"
+                        onclick="document.getElementById('logoutForm').submit()">
                         Log Out
                     </button>
+
+                    <!-- Hidden logout form -->
+                    <form id="logoutForm" action="{{ route('logout') }}" method="POST" class="hidden">
+                        @csrf
+                    </form>
                 </div>
             </div>
         </div>
@@ -305,129 +319,5 @@
         </div>
     </div>
 </body>
-
-<script>
-  // Toggle Admin Dropdown (Desktop)
-  function toggleAdminDropdown() {
-    const dropdown = document.getElementById('adminDropdown');
-    const icon = document.getElementById('adminDropdownIcon');
-    if (dropdown.classList.contains('hidden')) {
-      dropdown.classList.remove('hidden');
-      icon.classList.remove('fa-chevron-down');
-      icon.classList.add('fa-chevron-up');
-    } else {
-      dropdown.classList.add('hidden');
-      icon.classList.remove('fa-chevron-up');
-      icon.classList.add('fa-chevron-down');
-    }
-  }
-
-  // Toggle Admin Dropdown (Mobile)
-  function toggleAdminDropdownMobile() {
-    const dropdown = document.getElementById('adminDropdownMobile');
-    const icon = document.getElementById('adminDropdownIconMobile');
-    if (dropdown.classList.contains('hidden')) {
-      dropdown.classList.remove('hidden');
-      icon.classList.remove('fa-chevron-down');
-      icon.classList.add('fa-chevron-up');
-    } else {
-      dropdown.classList.add('hidden');
-      icon.classList.remove('fa-chevron-up');
-      icon.classList.add('fa-chevron-down');
-    }
-  }
-
-  // Open Mobile Sidebar
-  function openNav() {
-    document.getElementById('mySidenav').style.width = '250px';
-  }
-
-  // Close Mobile Sidebar
-  function closeNav() {
-    document.getElementById('mySidenav').style.width = '0';
-  }
-
-  // Toggle Dark Mode (both desktop and mobile)
-  function toggleDarkMode() {
-    const darkModeEnabled = document.documentElement.classList.toggle('dark');
-    // Update icons and text accordingly (desktop)
-    const darkModeIcon = document.getElementById('darkModeIcon');
-    const darkModeText = document.getElementById('darkModeText');
-    if (darkModeEnabled) {
-      darkModeIcon.classList.remove('fa-moon');
-      darkModeIcon.classList.add('fa-sun');
-      darkModeText.textContent = 'Light Mode';
-    } else {
-      darkModeIcon.classList.remove('fa-sun');
-      darkModeIcon.classList.add('fa-moon');
-      darkModeText.textContent = 'Dark Mode';
-    }
-
-    // Update icons and text accordingly (mobile)
-    const darkModeIconMobile = document.getElementById('darkModeIconMobile');
-    const darkModeTextMobile = document.getElementById('darkModeTextMobile');
-    if (darkModeEnabled) {
-      darkModeIconMobile.classList.remove('fa-moon');
-      darkModeIconMobile.classList.add('fa-sun');
-      darkModeTextMobile.textContent = 'Light Mode';
-    } else {
-      darkModeIconMobile.classList.remove('fa-sun');
-      darkModeIconMobile.classList.add('fa-moon');
-      darkModeTextMobile.textContent = 'Dark Mode';
-    }
-  }
-
-  // Attach event listeners for dark mode toggle buttons
-  document.getElementById('darkModeToggle').addEventListener('click', toggleDarkMode);
-  document.getElementById('darkModeToggleMobile').addEventListener('click', toggleDarkMode);
-
-  // Open Logout Modal
-  function openLogoutModal() {
-    document.getElementById('logoutModal').classList.remove('hidden');
-  }
-
-  // Close Logout Modal
-  function closeLogoutModal() {
-    document.getElementById('logoutModal').classList.add('hidden');
-  }
-
-  // Logout Function (placeholder)
-  function logout() {
-    // You can add your logout logic here, for example redirect or API call
-    alert('Logging out...');
-    // After logout logic, close modal
-    closeLogoutModal();
-  }
-
-  // Optional: Close dropdowns or sidebars if clicking outside (nice UX)
-  window.addEventListener('click', function (e) {
-    const adminDropdown = document.getElementById('adminDropdown');
-    const adminBtn = event.target.closest('button[onclick="toggleAdminDropdown()"]');
-    if (!adminBtn && !adminDropdown.contains(e.target)) {
-      adminDropdown.classList.add('hidden');
-      document.getElementById('adminDropdownIcon').classList.remove('fa-chevron-up');
-      document.getElementById('adminDropdownIcon').classList.add('fa-chevron-down');
-    }
-
-    const adminDropdownMobile = document.getElementById('adminDropdownMobile');
-    const adminBtnMobile = event.target.closest('button[onclick="toggleAdminDropdownMobile()"]');
-    if (!adminBtnMobile && !adminDropdownMobile.contains(e.target)) {
-      adminDropdownMobile.classList.add('hidden');
-      document.getElementById('adminDropdownIconMobile').classList.remove('fa-chevron-up');
-      document.getElementById('adminDropdownIconMobile').classList.add('fa-chevron-down');
-    }
-  });
-
-  // Hide loader after page load
-  window.addEventListener('load', () => {
-    const loader = document.getElementById('loader');
-    if (loader) {
-      loader.style.opacity = '0';
-      setTimeout(() => {
-        loader.style.display = 'none';
-      }, 300);
-    }
-  });
-</script>
 
 </html>

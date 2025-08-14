@@ -15,9 +15,14 @@
                             Daily Sale
                         </h2>
                         <p class="text-gray-700 text-2xl">
-                            $1,200
+                            ₱ {{ $totalDailySales }}
+                            @if($totalDailySales > $totalPreviousDaySales)
                             <i class="fas fa-arrow-up text-green-500 ml-2">
                             </i>
+                            @else
+                            <i class="fas fa-arrow-down text-red-500 ml-2">
+                            </i>
+                            @endif
                         </p>
                     </div>
                     <div>
@@ -27,7 +32,7 @@
                         <p class="text-gray-700 text-2xl">
                             <i class="fas fa-user mr-2">
                             </i>
-                            90
+                            {{ $totalDailyClients }}
                         </p>
                     </div>
                 </div>
@@ -38,9 +43,14 @@
                             Weekly Sale
                         </h2>
                         <p class="text-gray-700 text-2xl">
-                            $8,400
+                            ₱ {{ $totalWeeklySales }}
+                            @if($totalWeeklySales > $totalPreviousWeekSales)
                             <i class="fas fa-arrow-up text-green-500 ml-2">
                             </i>
+                            @else
+                            <i class="fas fa-arrow-down text-red-500 ml-2">
+                            </i>
+                            @endif
                         </p>
                     </div>
                     <div>
@@ -50,114 +60,16 @@
                         <p class="text-gray-700 text-2xl">
                             <i class="fas fa-user mr-2">
                             </i>
-                            630
+                            {{ $totalWeeklyClients }}
                         </p>
                     </div>
                 </div>
-                <!-- Common Diseases Pie Chart -->
-                <div class="bg-white p-6 rounded-lg shadow-md">
-                    <h2 class="text-xl font-bold mb-4">
-                        Common Diseases
-                    </h2>
-                    <div class="relative w-full h-64">
-                        <canvas id="diseasesChart">
-                        </canvas>
-                    </div>
-                </div>
+                @include('partials.analytics-charts')
             </div>
             <!-- Monthly Sales and Monthly Clients Bar Graph -->
-            <div class="bg-white p-6 rounded-lg shadow-md mt-4">
-                <h2 class="text-xl font-bold mb-4">
-                    Monthly Sales and Clients
-                </h2>
-                <div class="relative w-full h-64">
-                    <canvas id="monthlyChart">
-                    </canvas>
-                </div>
-            </div>
+            @include('partials.sales-and-clients-charts')
         </div>
-        <script>
-            const diseasesCtx = document.getElementById('diseasesChart').getContext('2d');
-            const diseasesChart = new Chart(diseasesCtx, {
-                type: 'pie',
-                data: {
-                    labels: ['Fleas and Ticks', 'Canine Parvovirus', 'Ear Infections', 'Dental Disease', 'Obesity'],
-                    datasets: [{
-                        label: 'Common Diseases',
-                        data: [30, 20, 15, 25, 10],
-                        backgroundColor: [
-                            'rgba(255, 99, 132, 0.2)',
-                            'rgba(54, 162, 235, 0.2)',
-                            'rgba(255, 206, 86, 0.2)',
-                            'rgba(75, 192, 192, 0.2)',
-                            'rgba(153, 102, 255, 0.2)'
-                        ],
-                        borderColor: [
-                            'rgba(255, 99, 132, 1)',
-                            'rgba(54, 162, 235, 1)',
-                            'rgba(255, 206, 86, 1)',
-                            'rgba(75, 192, 192, 1)',
-                            'rgba(153, 102, 255, 1)'
-                        ],
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false
-                }
-            });
 
-            const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
-            const monthlyChart = new Chart(monthlyCtx, {
-                type: 'bar',
-                data: {
-                    labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
-                    datasets: [{
-                            label: 'Monthly Sales ($)',
-                            data: [12000, 15000, 13000, 17000, 14000, 16000, 18000, 19000, 20000, 21000, 22000, 23000],
-                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                            borderColor: 'rgba(54, 162, 235, 1)',
-                            borderWidth: 1,
-                            yAxisID: 'y'
-                        },
-                        {
-                            label: 'Monthly Clients',
-                            data: [1550, 1600, 1555, 1570, 1565, 1575, 1580, 1585, 1590, 1595, 1600, 1605],
-                            backgroundColor: 'rgba(255, 206, 86, 0.2)',
-                            borderColor: 'rgba(255, 206, 86, 1)',
-                            borderWidth: 1,
-                            yAxisID: 'y1'
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            position: 'left',
-                            title: {
-                                display: true,
-                                text: 'Sales ($)'
-                            }
-                        },
-                        y1: {
-                            beginAtZero: true,
-                            position: 'right',
-                            title: {
-                                display: true,
-                                text: 'Clients'
-                            },
-                            grid: {
-                                drawOnChartArea: false
-                            }
-                        }
-                    }
-                }
-            });
-        </script>
     </div>
 </div>
 @endsection

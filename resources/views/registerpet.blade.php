@@ -6,20 +6,20 @@
 
     {{-- Success Message --}}
     @if(session('success'))
-        <div class="bg-green-200 text-green-800 p-3 rounded my-2">
-            {{ session('success') }}
-        </div>
+    <div class="bg-green-200 text-green-800 p-3 rounded my-2">
+        {{ session('success') }}
+    </div>
     @endif
 
     {{-- Error Messages --}}
     @if ($errors->any())
-        <div class="bg-red-200 text-red-800 p-3 rounded my-2">
-            <ul class="list-disc list-inside">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
+    <div class="bg-red-200 text-red-800 p-3 rounded my-2">
+        <ul class="list-disc list-inside">
+            @foreach ($errors->all() as $error)
+            <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
     @endif
 
     {{-- Registration Form --}}
@@ -59,14 +59,22 @@
                 <input name="pet_name" class="p-2 border border-gray-300 rounded bg-white text-black"
                     placeholder="Pet Name" type="text" required />
 
-                <input name="pet_type" class="p-2 border border-gray-300 rounded bg-white text-black"
-                    placeholder="Type of Pet" type="text" required />
+                <select name="pet_type" required
+                    class="p-2 border border-gray-300 rounded bg-white text-black appearance-none">
+                    <option value="" disabled selected>Select Pet Type</option>
+                    <option value="Dog">Dog</option>
+                    <option value="Cat">Cat</option>
+                </select>
 
                 <input name="breed" class="p-2 border border-gray-300 rounded bg-white text-black"
                     placeholder="Breed" type="text" />
 
-                <input name="gender" class="p-2 border border-gray-300 rounded bg-white text-black"
-                    placeholder="Gender" type="text" required />
+                <select name="gender" required
+                    class="p-2 border border-gray-300 rounded bg-white text-black appearance-none">
+                    <option value="" disabled selected>Select Gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                </select>
 
                 <div class="relative">
                     <span class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
@@ -98,6 +106,13 @@
 
                 <input name="treatment" class="p-2 border border-gray-300 rounded bg-white text-black"
                     placeholder="Treatment" type="text" />
+                
+                <select name="diagnosed_by" required
+                    class="p-2 border border-gray-300 rounded bg-white text-black appearance-none">
+                    <option value="" disabled selected> Diagnosed By</option>
+                    <option value="Dr. Smith">Dr. 1</option>
+                    <option value="Dr. Johnson">Dr. 2</option>
+                </select>
             </div>
 
             <div class="flex justify-end">

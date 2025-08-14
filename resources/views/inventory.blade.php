@@ -1,5 +1,4 @@
 @extends('layouts.default-layout')
-
 @section('content')
 <div class="container mx-auto p-3">
     <div class="flex items-center justify-between mb-4">
@@ -39,7 +38,40 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 overflow-y-auto h-[calc(100vh-150px)]" id="inventoryGrid">
+    <!-- SUCCESS MODAL -->
+    @if(session('success'))
+    <div id="successModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+        <div class="bg-white p-6 rounded-lg shadow-md max-w-md w-full text-center">
+            <h2 class="text-xl font-bold text-green-600 mb-2">Success</h2>
+            <p class="text-gray-800">{{ session('success') }}</p>
+        </div>
+    </div>
+
+    <script>
+        setTimeout(() => closeModal('successModal'), 3000);
+    </script>
+    @endif
+
+    <!-- ERROR MODAL -->
+    @if($errors->any())
+    <div id="errorModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+        <div class="bg-white p-6 rounded-lg shadow-md max-w-md w-full text-center">
+            <h2 class="text-xl font-bold text-red-600 mb-2">Error</h2>
+            <ul class="list-disc list-inside text-red-700 text-left">
+                @foreach($errors->all() as $error)
+                <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        setTimeout(() => closeModal('errorModal'), 3000);
+    </script>
+    @endif
+
+
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-8 overflow-y-auto h-[calc(100vh-150px)]" id="inventoryGrid">
         @foreach ($items as $item)
         <div class="relative inventory-wrapper">
             <img
@@ -61,7 +93,6 @@
         @endif
     </div>
     @endforeach
-</div>
 </div>
 
 <!-- ADD MODAL -->

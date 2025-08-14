@@ -27,6 +27,7 @@ class PetInventoryController extends Controller
             'diagnosis' => 'nullable|string',
             'vital_signs' => 'nullable|string',
             'treatment' => 'nullable|string',
+            'diagnosed_by' => 'required|string',
         ]);
 
         PetInventory::create($request->all());

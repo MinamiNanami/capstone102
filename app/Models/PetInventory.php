@@ -27,7 +27,8 @@ class PetInventory extends Model
         'history',
         'diagnosis',
         'vital_signs',
-        'treatment'
+        'treatment',
+        'diagnosed_by'
     ];
 
     public function checkups()

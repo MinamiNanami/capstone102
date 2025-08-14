@@ -33,7 +33,7 @@ return new class extends Migration
             $table->text('diagnosis')->nullable();
             $table->text('vital_signs')->nullable();
             $table->text('treatment')->nullable();
-
+            $table->text('diagnosed_by');
             $table->timestamps();
         });
     }
