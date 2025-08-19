@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('diagnosis')->nullable();
             $table->string('vital_signs')->nullable();
             $table->string('treatment')->nullable();
+            $table->string('diagnosed_by')->nullable();
             $table->text('history')->nullable();
             $table->timestamps();
 

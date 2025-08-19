@@ -17,6 +17,7 @@ class PetCheckup extends Model
         'vital_signs',
         'treatment',
         'history',
+        'diagnosed_by',
         'timestamps',
     ];
 

@@ -42,7 +42,6 @@ Route::middleware('auth')->group(function () {
         return view('schedule');
     });
 
-
     Route::get('/schedule', [ScheduleController::class, 'index'])->name('schedule');
     Route::post('/schedule', [ScheduleController::class, 'store'])->name('schedule.store');
 

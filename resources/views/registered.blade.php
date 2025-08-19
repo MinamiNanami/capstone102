@@ -5,9 +5,9 @@
     <h2 class="text-xl font-bold text-black mb-4">CLIENTS RECORDS</h2>
 
     @if(session('success'))
-        <div class="bg-green-200 text-green-800 p-2 rounded mb-4">
-            {{ session('success') }}
-        </div>
+    <div class="bg-green-200 text-green-800 p-2 rounded mb-4">
+        {{ session('success') }}
+    </div>
     @endif
 
     {{-- Search + Filter --}}
@@ -49,23 +49,23 @@
             </thead>
             <tbody>
                 @foreach($patients as $patient)
-                    <tr class="hover:bg-gray-100">
-                        <td class="border p-2">{{ $patient->updated_at->format('Y-m-d') }}</td>
-                        <td class="border p-2">{{ $patient->owner_name }}</td>
-                        <td class="border p-2">{{ $patient->pet_name }}</td>
-                        <td class="border p-2">{{ $patient->pet_type }}</td>
-                        <td class="border p-2">{{ $patient->gender }}</td>
-                        <td class="border p-2">{{ $patient->disease }}</td>
-                        <td class="border p-2 space-x-1">
-                            <form method="GET" action="{{ route('registered') }}" class="inline">
-                                <input type="hidden" name="show" value="{{ $patient->id }}">
-                                <button class="bg-yellow-500 hover:bg-yellow-400 text-black px-2 py-1 rounded text-sm">View</button>
-                            </form>
-                            @if($patient->history)
-                                <button onclick="document.getElementById('modal-hist-{{ $patient->id }}').classList.remove('hidden')" class="bg-blue-500 hover:bg-blue-400 text-white px-2 py-1 rounded text-sm">History</button>
-                            @endif
-                        </td>
-                    </tr>
+                <tr class="hover:bg-gray-100">
+                    <td class="border p-2">{{ $patient->updated_at->format('Y-m-d') }}</td>
+                    <td class="border p-2">{{ $patient->owner_name }}</td>
+                    <td class="border p-2">{{ $patient->pet_name }}</td>
+                    <td class="border p-2">{{ $patient->pet_type }}</td>
+                    <td class="border p-2">{{ $patient->gender }}</td>
+                    <td class="border p-2">{{ $patient->disease }}</td>
+                    <td class="border p-2 space-x-1">
+                        <form method="GET" action="{{ route('registered') }}" class="inline">
+                            <input type="hidden" name="show" value="{{ $patient->id }}">
+                            <button class="bg-yellow-500 hover:bg-yellow-400 text-black px-2 py-1 rounded text-sm">View</button>
+                        </form>
+                        @if($patient->history)
+                        <button onclick="document.getElementById('modal-hist-{{ $patient->id }}').classList.remove('hidden')" class="bg-blue-500 hover:bg-blue-400 text-white px-2 py-1 rounded text-sm">History</button>
+                        @endif
+                    </td>
+                </tr>
                 @endforeach
             </tbody>
         </table>
@@ -74,24 +74,24 @@
 
 {{-- History Modals --}}
 @foreach($patients as $patient)
-    @if($patient->history)
-    <div id="modal-hist-{{ $patient->id }}" class="modal fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 hidden">
-        <div class="bg-white rounded-lg w-full max-w-lg p-6 relative">
-            <button onclick="document.getElementById('modal-hist-{{ $patient->id }}').classList.add('hidden')" class="absolute top-2 right-2 text-gray-600 hover:text-black text-2xl">&times;</button>
-            <h2 class="text-lg font-bold mb-2">Check-up History for {{ $patient->pet_name }}</h2>
-            <div class="text-sm whitespace-pre-line border border-gray-300 p-4 rounded bg-gray-50">
-                {{ $patient->history }}
-            </div>
+@if($patient->history)
+<div id="modal-hist-{{ $patient->id }}" class="modal fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 hidden">
+    <div class="bg-white rounded-lg w-full max-w-lg p-6 relative">
+        <button onclick="document.getElementById('modal-hist-{{ $patient->id }}').classList.add('hidden')" class="absolute top-2 right-2 text-gray-600 hover:text-black text-2xl">&times;</button>
+        <h2 class="text-lg font-bold mb-2">Check-up History for {{ $patient->pet_name }}</h2>
+        <div class="text-sm whitespace-pre-line border border-gray-300 p-4 rounded bg-gray-50">
+            {{ $patient->history }}
         </div>
     </div>
-    @endif
+</div>
+@endif
 @endforeach
 
 {{-- Check-up View Modal --}}
 @if(request('show'))
 @php
-    $selected = $patients->where('id', request('show'))->first();
-    $checkups = $selected->checkups ?? [];
+$selected = $patients->where('id', request('show'))->first();
+$checkups = $selected->checkups ?? [];
 @endphp
 
 <div class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -121,6 +121,7 @@
                     <th class="border p-2">Diagnosis</th>
                     <th class="border p-2">Vital Signs</th>
                     <th class="border p-2">Treatment</th>
+                    <th class="border p-2">Diagnosed By</th>
                 </tr>
             </thead>
             <tbody>
@@ -130,15 +131,17 @@
                     <td class="border p-2">{{ $selected->diagnosis }}</td>
                     <td class="border p-2">{{ $selected->vital_signs }}</td>
                     <td class="border p-2">{{ $selected->treatment }}</td>
+                    <td class="border p-2">{{ $selected->diagnosed_by }}</td>
                 </tr>
                 @foreach($selected->checkups as $checkup)
-                    <tr>
-                        <td class="border p-2">{{ $checkup->created_at->format('Y-m-d') }}</td>
-                        <td class="border p-2">{{ $checkup->disease }}</td>
-                        <td class="border p-2">{{ $checkup->diagnosis }}</td>
-                        <td class="border p-2">{{ $checkup->vital_signs }}</td>
-                        <td class="border p-2">{{ $checkup->treatment }}</td>
-                    </tr>
+                <tr>
+                    <td class="border p-2">{{ $checkup->created_at->format('Y-m-d') }}</td>
+                    <td class="border p-2">{{ $checkup->disease }}</td>
+                    <td class="border p-2">{{ $checkup->diagnosis }}</td>
+                    <td class="border p-2">{{ $checkup->vital_signs }}</td>
+                    <td class="border p-2">{{ $checkup->treatment }}</td>
+                    <td class="border p-2">{{ $checkup->diagnosed_by }}</td>
+                </tr>
                 @endforeach
             </tbody>
         </table>
@@ -163,11 +166,21 @@
                 <label>Treatment</label>
                 <input type="text" name="treatment" class="w-full border p-2 rounded">
             </div>
-            <div class="md:col-span-2 text-right">
+            <div>
+                <label>Diagnosed By</label>
+                <select name="diagnosed_by" class="w-full border p-2 rounded" required>
+                    <option value="" disabled selected>Select Veterinarian</option>
+                    <option value="Dr. 1">Dr. 1</option>
+                    <option value="Dr. 2">Dr. 2</option>
+                </select>
+            </div>
+
+            <div class="md:col-span-2 text-right mt-2">
                 <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-400">
                     Save Check-Up
                 </button>
             </div>
+
         </form>
     </div>
 </div>
@@ -175,32 +188,32 @@
 
 {{-- JS for modal and filter --}}
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    // ESC to close modals
-    document.addEventListener('keydown', function (e) {
-        if (e.key === "Escape") {
-            document.querySelectorAll('.modal').forEach(modal => modal.classList.add('hidden'));
-        }
-    });
-
-    // Close modal on click outside content
-    document.querySelectorAll('.modal').forEach(modal => {
-        modal.addEventListener('click', function (e) {
-            if (e.target === modal) {
-                modal.classList.add('hidden');
+    document.addEventListener('DOMContentLoaded', function() {
+        // ESC to close modals
+        document.addEventListener('keydown', function(e) {
+            if (e.key === "Escape") {
+                document.querySelectorAll('.modal').forEach(modal => modal.classList.add('hidden'));
             }
         });
-    });
 
-    // Reset filters
-    const resetBtn = document.getElementById('reset-filters');
-    if (resetBtn) {
-        resetBtn.addEventListener('click', function () {
-            document.querySelector('input[name="search"]').value = '';
-            document.querySelector('select[name="sort"]').selectedIndex = 0;
-            document.querySelector('form').submit();
+        // Close modal on click outside content
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    modal.classList.add('hidden');
+                }
+            });
         });
-    }
-});
+
+        // Reset filters
+        const resetBtn = document.getElementById('reset-filters');
+        if (resetBtn) {
+            resetBtn.addEventListener('click', function() {
+                document.querySelector('input[name="search"]').value = '';
+                document.querySelector('select[name="sort"]').selectedIndex = 0;
+                document.querySelector('form').submit();
+            });
+        }
+    });
 </script>
 @endsection
