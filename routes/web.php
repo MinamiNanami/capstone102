@@ -8,6 +8,7 @@ use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\PetInventoryController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\OtpController;
 
 Route::get('/', function () {
     return view('auth.login');
@@ -61,5 +62,37 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+Route::get('/api/transactions/daily', function () {
+    $transactions = \App\Models\Transaction::with('items')
+        ->whereDate('created_at', today())
+        ->get();
+
+    return response()->json(['transactions' => $transactions]);
+});
+
+Route::get('/api/transactions/weekly', function () {
+    $transactions = \App\Models\Transaction::with('items')
+        ->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])
+        ->get();
+
+    return response()->json(['transactions' => $transactions]);
+});
+
+// OTP request
+Route::get('/otp-request', [OtpController::class, 'showEmailForm'])->name('otp.request');
+Route::post('/otp-send', [OtpController::class, 'sendOtp'])->name('otp.send');
+Route::get('/otp-verify', [OtpController::class, 'showOtpForm'])->name('otp.verify.form');
+Route::post('/otp-verify', [OtpController::class, 'verifyOtp'])->name('otp.verify');
+Route::post('/otp/check', [OtpController::class, 'verifyOtp'])->name('otp.check');
+
+// Protected Profile
+Route::get('/profile', function () {
+    if (!session()->get('otp_verified')) {
+        return redirect()->route('otp.request');
+    }
+    return view('profile.edit');
+})->name('profile.edit');
+
 
 require __DIR__ . '/auth.php';

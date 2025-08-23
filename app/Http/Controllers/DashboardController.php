@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\PetCheckup;
 use App\Models\PosSale;
 use App\Models\PetInventory;
+use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use App\Models\Schedule;
 
 class DashboardController extends Controller
 {
@@ -25,6 +27,12 @@ class DashboardController extends Controller
         $totalDailyClients = PosSale::whereDate('created_at', today())->count('id');
         $totalWeeklyClients = PosSale::where('created_at', '>=', now()->subDays(7))->count('id');
 
+        $dailyTransactions = Transaction::with('items')
+            ->whereDate('created_at', today())
+            ->get();
+
+        $schedules = Schedule::all();
+
         return view('dashboard', compact(
             'totalDailySales',
             'totalWeeklySales',
@@ -32,6 +40,8 @@ class DashboardController extends Controller
             'totalWeeklyClients',
             'totalPreviousDaySales',
             'totalPreviousWeekSales',
+            'dailyTransactions',
+            'schedules'
         ));
     }
 
