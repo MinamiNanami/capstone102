@@ -1,7 +1,7 @@
 @extends('layouts.default-layout')
 
 @section('content')
-<div class="w-full p-4 ">
+<div class="w-full p-4">
     <div class="bg-gray-100 font-roboto">
         <div class="container mx-auto p-4">
 
@@ -33,20 +33,21 @@
                     </div>
                 </div>
 
-                <!-- Nearest Upcoming Schedule Card (Table Style) -->
+                <!-- Upcoming Appointments Card -->
                 <div class="bg-white p-6 rounded-lg shadow-md">
                     @php
                     use Illuminate\Support\Carbon;
 
-                    $nextSchedule = $schedules
-                    ->filter(fn($s) => Carbon::parse($s->date)->isFuture())
-                    ->sortBy('date')
-                    ->first();
+                    // Get next 5 upcoming schedules
+                    $upcomingSchedules = $schedules
+                        ->filter(fn($s) => Carbon::parse($s->date)->isFuture())
+                        ->sortBy('date')
+                        ->take(6);
                     @endphp
 
-                    <h2 class="text-xl font-bold mb-4">Upcoming Appointment</h2>
+                    <h2 class="text-xl font-bold mb-4">Upcoming Appointments</h2>
 
-                    @if ($nextSchedule)
+                    @if ($upcomingSchedules->isNotEmpty())
                     <div class="overflow-x-auto">
                         <table class="min-w-full text-sm text-left text-gray-700">
                             <thead class="bg-gray-100 font-semibold text-gray-900">
@@ -57,15 +58,17 @@
                                 </tr>
                             </thead>
                             <tbody>
+                                @foreach ($upcomingSchedules as $schedule)
                                 <tr class="border-t">
-                                    <td class="px-4 py-2">{{ $nextSchedule->title }}</td>
+                                    <td class="px-4 py-2">{{ $schedule->title }}</td>
                                     <td class="px-4 py-2">
-                                        {{ \Carbon\Carbon::parse($nextSchedule->date)->format('F j, Y') }}
+                                        {{ Carbon::parse($schedule->date)->format('F j, Y') }}
                                     </td>
                                     <td class="px-4 py-2">
-                                        {{ $nextSchedule->time ? \Carbon\Carbon::parse($nextSchedule->time)->format('g:i A') : 'N/A' }}
+                                        {{ $schedule->time ? Carbon::parse($schedule->time)->format('g:i A') : 'N/A' }}
                                     </td>
                                 </tr>
+                                @endforeach
                             </tbody>
                         </table>
                     </div>
@@ -82,7 +85,7 @@
     </div>
 </div>
 
-<!-- Transactions Modal (if needed for Daily) -->
+<!-- Transactions Modal -->
 <div id="transactionsModal" class="fixed inset-0 bg-black bg-opacity-50 hidden justify-center items-center z-50 overflow-auto p-4">
     <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto relative">
         <button onclick="closeTransactionModal()" class="absolute top-2 right-2 text-gray-600 hover:text-gray-900 text-3xl font-bold leading-none">&times;</button>
@@ -92,7 +95,6 @@
 </div>
 
 <script>
-    // Utility to format date nicely
     function formatDate(dateString) {
         const d = new Date(dateString);
         return d.toLocaleString('en-US', {
@@ -109,12 +111,14 @@
         document.getElementById('transactionsModalTitle').textContent = title;
 
         if (!transactions.length) {
-            document.getElementById('transactionsList').innerHTML = `<p class="text-gray-500">No transactions found.</p>`;
+            document.getElementById('transactionsList').innerHTML =
+                `<p class="text-gray-500">No transactions found.</p>`;
             showModal();
             return;
         }
 
         let totalAllTransactions = 0;
+        const overallItems = {};
         let html = '';
 
         transactions.forEach(tx => {
@@ -125,6 +129,11 @@
             if (tx.items && tx.items.length > 0) {
                 itemsString = tx.items.map(item => `${item.quantity}x ${item.item_name} - ₱${parseFloat(item.price).toFixed(2)}`).join('; ');
                 totalPrice = tx.items.reduce((sum, item) => sum + parseFloat(item.price), 0);
+
+                tx.items.forEach(item => {
+                    if (!overallItems[item.item_name]) overallItems[item.item_name] = 0;
+                    overallItems[item.item_name] += parseInt(item.quantity);
+                });
             }
 
             totalAllTransactions += totalPrice;
@@ -147,11 +156,18 @@
             `;
         });
 
-        html += `
-            <div class="mt-4 border-t pt-4 text-right font-bold text-xl">
-                Total of All Transactions: ₱${totalAllTransactions.toFixed(2)}
-            </div>
-        `;
+        // Overall items summary
+        html += `<div class="mt-4 border-t pt-4">
+                    <h3 class="font-bold mb-2">Overall Items Sold:</h3>
+                    <ul class="list-disc pl-5">`;
+        for (const [itemName, qty] of Object.entries(overallItems)) {
+            html += `<li>${qty}x ${itemName}</li>`;
+        }
+        html += `</ul>
+                <div class="mt-4 text-right font-bold text-xl">
+                    Total of All Transactions: ₱${totalAllTransactions.toFixed(2)}
+                </div>
+            </div>`;
 
         document.getElementById('transactionsList').innerHTML = html;
         showModal();
@@ -220,7 +236,7 @@
         );
     }
 
-    // ✅ Only for Daily
+    // Daily Transactions fetch
     document.getElementById('dailySaleCard').addEventListener('click', () => {
         fetch('/api/transactions/daily')
             .then(res => res.json())

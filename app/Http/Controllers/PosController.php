@@ -58,12 +58,15 @@ class PosController extends Controller
             }
         }
 
-        // 3. Save to Transactions table
+        // 3. Save to Transactions table with receipt number
         $transaction = Transaction::create([
-            'customer_name' => $request->customer_name ?? 'Customer', // ✅ Corrected field name
-            'amount' => $request->total,                               // ✅ Keep using this
-            // 'created_at' handled automatically by Laravel
+            'customer_name' => $request->customer_name ?? 'Customer',
+            'amount' => $request->total,
         ]);
+
+        // Generate a unique, sequential receipt number like "TX-000001"
+        $transaction->receipt_number = 'TX-' . str_pad($transaction->id, 6, '0', STR_PAD_LEFT);
+        $transaction->save();
 
         foreach ($request->items as $item) {
             $product = InventoryItem::find($item['inventory_item_id']);
@@ -74,8 +77,12 @@ class PosController extends Controller
             ]);
         }
 
-        return redirect()->back()->with('success', 'Sale and transaction recorded successfully.');
+        // Pass transaction to the session for the receipt
+        return redirect()->back()
+            ->with('success', 'Sale and transaction recorded successfully.')
+            ->with('transaction', $transaction);
     }
+
 
     public function completePurchase(Request $request)
     {

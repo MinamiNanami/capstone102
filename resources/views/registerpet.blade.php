@@ -62,8 +62,13 @@
                 <select name="pet_type" required
                     class="p-2 border border-gray-300 rounded bg-white text-black appearance-none">
                     <option value="" disabled selected>Select Pet Type</option>
-                    <option value="Dog">Dog</option>
-                    <option value="Cat">Cat</option>
+                    <option value="K9">K9</option>
+                    <option value="Feline">Feline</option>
+                    <option value="Avian">Avian</option>
+                    <option value="Amphibian">Amphibian</option>
+                    <option value="Reptile">Reptile</option>
+                    <option value="Lagomorph">Lagomorph (Rabbit, Hare)</option>
+                    <option value="Rodent">Rodent (Hamster, Guinea Pig)</option>
                 </select>
 
                 <input name="breed" class="p-2 border border-gray-300 rounded bg-white text-black"
@@ -74,6 +79,8 @@
                     <option value="" disabled selected>Select Gender</option>
                     <option value="Male">Male</option>
                     <option value="Female">Female</option>
+                    <option value="Neutered">Neutered</option>
+                    <option value="Spayed">Spayed</option>
                 </select>
 
                 <div class="relative">
@@ -86,39 +93,18 @@
 
                 <input name="markings" class="p-2 border border-gray-300 rounded bg-white text-black"
                     placeholder="Markings" type="text" />
-
-                <input name="disease" class="p-2 border border-gray-300 rounded bg-white text-black"
-                    placeholder="Disease" type="text" />
             </div>
 
             <textarea name="history"
                 class="p-2 border border-gray-300 rounded w-full mb-4 resize-none bg-white text-black"
                 placeholder="Enter additional information..." rows="3"></textarea>
 
-            <h2 class="text-xl font-bold text-gray-700 mb-4">Medical Information</h2>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <input name="vital_signs" class="p-2 border border-gray-300 rounded bg-white text-black"
-                    placeholder="Vital Signs" type="text" />
-
-                <input name="diagnosis" class="p-2 border border-gray-300 rounded bg-white text-black"
-                    placeholder="Diagnosis" type="text" />
-
-                <input name="treatment" class="p-2 border border-gray-300 rounded bg-white text-black"
-                    placeholder="Treatment" type="text" />
-                
-                <select name="diagnosed_by" required
-                    class="p-2 border border-gray-300 rounded bg-white text-black appearance-none">
-                    <option value="" disabled selected> Diagnosed By</option>
-                    <option value="Dr. Smith">Dr. 1</option>
-                    <option value="Dr. Johnson">Dr. 2</option>
-                </select>
-            </div>
+            
 
             <div class="flex justify-end">
                 <button type="submit"
                     class="bg-yellow-500 text-black px-3 py-1 text-sm rounded hover:bg-yellow-400 transition">
-                    ADMIT
+                    REGISTER
                 </button>
             </div>
         </div>

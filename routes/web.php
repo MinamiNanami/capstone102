@@ -39,10 +39,6 @@ Route::middleware('auth')->group(function () {
     })->name('registerpet');
     Route::post('/registerpet/store', [PetInventoryController::class, 'store'])->name('registerpet.store');
 
-    Route::get('/schedule', function () {
-        return view('schedule');
-    });
-
     Route::get('/schedule', [ScheduleController::class, 'index'])->name('schedule');
     Route::post('/schedule', [ScheduleController::class, 'store'])->name('schedule.store');
 

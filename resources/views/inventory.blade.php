@@ -1,23 +1,31 @@
 @extends('layouts.default-layout')
+
 @section('content')
 <div class="container mx-auto p-3">
     <div class="flex items-center justify-between mb-4">
         <h1 class="text-3xl font-bold">INVENTORY</h1>
         <div class="flex justify-end space-x-2 items-center">
+            <!-- View Toggle -->
+            <button onclick="toggleView()"
+                class="bg-purple-500 text-white px-4 py-2 rounded-lg flex items-center justify-center hover:bg-purple-400">
+                <i id="viewIcon" class="fas fa-th mr-2"></i>
+                <span id="viewLabel">Grid View</span>
+            </button>
+
+            <!-- Add / Edit Buttons -->
             <button onclick="openModal('addModal')"
                 class="bg-green-500 text-white px-4 py-2 rounded-lg flex items-center justify-center hover:bg-green-300">
-                <i class="fas fa-plus mr-2"></i>
-                Add
+                <i class="fas fa-plus mr-2"></i> Add
             </button>
             <button onclick="toggleEditMode()"
                 class="bg-blue-500 text-white px-4 py-2 rounded-lg flex items-center justify-center hover:bg-blue-300">
-                <i class="fas fa-edit mr-2"></i>
-                Edit
+                <i class="fas fa-edit mr-2"></i> Edit
             </button>
             <span id="editModeLabel" class="text-sm font-semibold text-gray-600">Edit Mode: OFF</span>
         </div>
     </div>
 
+    <!-- Category & Search -->
     <div class="flex flex-wrap justify-between items-center mb-2">
         <div class="flex space-x-2" id="categoryFilter">
             <button class="category-btn px-4 py-2 rounded" data-category="ALL">ALL</button>
@@ -38,44 +46,12 @@
         </div>
     </div>
 
-    <!-- SUCCESS MODAL -->
-    @if(session('success'))
-    <div id="successModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-        <div class="bg-white p-6 rounded-lg shadow-md max-w-md w-full text-center">
-            <h2 class="text-xl font-bold text-green-600 mb-2">Success</h2>
-            <p class="text-gray-800">{{ session('success') }}</p>
-        </div>
-    </div>
-
-    <script>
-        setTimeout(() => closeModal('successModal'), 3000);
-    </script>
-    @endif
-
-    <!-- ERROR MODAL -->
-    @if($errors->any())
-    <div id="errorModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-        <div class="bg-white p-6 rounded-lg shadow-md max-w-md w-full text-center">
-            <h2 class="text-xl font-bold text-red-600 mb-2">Error</h2>
-            <ul class="list-disc list-inside text-red-700 text-left">
-                @foreach($errors->all() as $error)
-                <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    </div>
-
-    <script>
-        setTimeout(() => closeModal('errorModal'), 3000);
-    </script>
-    @endif
-
-
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-8 overflow-y-auto h-[calc(100vh-150px)]" id="inventoryGrid">
+    <!-- Inventory Container -->
+    <div id="inventoryContainer" class="grid grid-cols-2 md:grid-cols-4 gap-8 overflow-y-auto h-[calc(100vh-150px)]">
         @foreach ($items as $item)
-        <div class="relative inventory-wrapper">
-            <img
-                src="{{ asset('storage/' . $item->image) }}"
+        <div class="relative inventory-wrapper bg-grey border-2 rounded p-2 flex flex-col list-view-item">
+            <!-- Thumbnail for Grid -->
+            <img src="{{ asset('storage/' . $item->image) }}"
                 alt="{{ $item->name }}"
                 data-id="{{ $item->id }}"
                 data-name="{{ $item->name }}"
@@ -84,6 +60,29 @@
                 data-price="{{ $item->price }}"
                 data-image="{{ asset('storage/' . $item->image) }}"
                 class="inventory-item w-full h-48 object-cover rounded-md filter hover:brightness-[65%] cursor-pointer {{ $item->quantity == 0 ? 'grayscale' : '' }}" />
+
+            <!-- List View Info -->
+            <div class="list-view-info mt-2 hidden flex-1 cursor-pointer"
+                data-id="{{ $item->id }}"
+                data-name="{{ $item->name }}"
+                data-category="{{ $item->category }}"
+                data-quantity="{{ $item->quantity }}"
+                data-price="{{ $item->price }}"
+                data-image="{{ asset('storage/' . $item->image) }}">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <img src="{{ asset('storage/' . $item->image) }}" class="w-12 h-12 object-cover rounded">
+                        <div>
+                            <h3 class="font-bold">{{ $item->name }}</h3>
+                            <p class="text-sm text-gray-600">{{ $item->category }}</p>
+                            <p class="text-sm">Qty: {{ $item->quantity }}</p>
+                        </div>
+                    </div>
+                    <div class="text-right font-semibold text-gray-800">
+                        ₱{{ number_format($item->price, 2) }}
+                    </div>
+                </div>
+            </div>
 
             @if ($item->quantity == 0)
             <div class="absolute top-2 left-2 bg-red-600 text-white text-xs font-semibold px-2 py-1 rounded">OUT OF STOCK</div>
@@ -94,7 +93,7 @@
     </div>
     @endforeach
 </div>
-
+</div>
 <!-- ADD MODAL -->
 <div id="addModal" class="fixed inset-0 bg-black bg-opacity-50 hidden justify-center items-center z-50">
     <div class="bg-white rounded-lg p-6 w-full max-w-md">
@@ -220,106 +219,102 @@
     @method('DELETE')
 </form>
 
-<!-- SCRIPT -->
+<!-- ========== SCRIPTS ========== -->
 <script>
-    const categoryButtons = document.querySelectorAll('.category-btn');
-    const inventoryItems = document.querySelectorAll('.inventory-item');
-    const searchInput = document.getElementById('searchInput');
-    const editModeLabel = document.getElementById('editModeLabel');
-    let selectedItemId = null;
-    let isEditMode = false;
+    let isGridView = true;
+    let editMode = false;
 
-    function resetCategoryButtonStyles() {
-        categoryButtons.forEach(btn => {
-            btn.classList.remove('bg-blue-600', 'text-white');
-            btn.classList.add('bg-gray-200', 'text-black');
-        });
+    function toggleView(save = true) {
+        const container = document.getElementById('inventoryContainer');
+        const viewLabel = document.getElementById('viewLabel');
+        const viewIcon = document.getElementById('viewIcon');
+        const listInfos = document.querySelectorAll('.list-view-info');
+        const thumbnails = document.querySelectorAll('.inventory-item');
+
+        if (isGridView) {
+            // Switch to list view
+            container.classList.remove('grid', 'grid-cols-2', 'md:grid-cols-4', 'gap-8');
+            container.classList.add('flex', 'flex-col', 'space-y-2');
+
+            listInfos.forEach(info => info.classList.remove('hidden'));
+            thumbnails.forEach(img => img.classList.add('hidden'));
+
+            viewLabel.textContent = "List View";
+            viewIcon.classList.remove('fa-th');
+            viewIcon.classList.add('fa-list');
+
+            if (save) localStorage.setItem('inventoryView', 'list');
+        } else {
+            // Switch to grid view
+            container.classList.remove('flex', 'flex-col', 'space-y-2');
+            container.classList.add('grid', 'grid-cols-2', 'md:grid-cols-4', 'gap-8');
+
+            listInfos.forEach(info => info.classList.add('hidden'));
+            thumbnails.forEach(img => img.classList.remove('hidden'));
+
+            viewLabel.textContent = "Grid View";
+            viewIcon.classList.remove('fa-list');
+            viewIcon.classList.add('fa-th');
+
+            if (save) localStorage.setItem('inventoryView', 'grid');
+        }
+
+        isGridView = !isGridView;
     }
 
-    categoryButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            resetCategoryButtonStyles();
-            btn.classList.remove('bg-gray-200', 'text-black');
-            btn.classList.add('bg-blue-600', 'text-white');
-            const category = btn.dataset.category;
-            filterItems(category, searchInput.value);
-        });
-    });
-
-    function filterItems(category, keyword) {
-        document.querySelectorAll('.inventory-wrapper').forEach(wrapper => {
-            const img = wrapper.querySelector('.inventory-item');
-            const itemCategory = img.dataset.category.toUpperCase();
-            const itemAlt = img.alt.toUpperCase();
-            const matchCategory = (category === 'ALL' || itemCategory === category);
-            const matchSearch = itemAlt.includes(keyword.toUpperCase());
-            wrapper.style.display = (matchCategory && matchSearch) ? '' : 'none';
-        });
-    }
-
-    function filterTable() {
-        const activeBtn = document.querySelector('.category-btn.bg-blue-600');
-        const activeCategory = activeBtn ? activeBtn.dataset.category : 'ALL';
-        filterItems(activeCategory, searchInput.value);
+    function toggleEditMode() {
+        editMode = !editMode;
+        document.getElementById('editModeLabel').textContent = "Edit Mode: " + (editMode ? "ON" : "OFF");
     }
 
     function openModal(id) {
-        document.getElementById(id).classList.remove('hidden');
+        document.getElementById(id).classList.remove('hidden', 'opacity-0');
         document.getElementById(id).classList.add('flex');
     }
 
     function closeModal(id) {
-        document.getElementById(id).classList.remove('flex');
         document.getElementById(id).classList.add('hidden');
+        document.getElementById(id).classList.remove('flex');
     }
 
-    function toggleEditMode() {
-        isEditMode = !isEditMode;
-        editModeLabel.textContent = isEditMode ? 'Edit Mode: ON' : 'Edit Mode: OFF';
-        editModeLabel.classList.toggle('text-red-600', isEditMode);
-        editModeLabel.classList.toggle('text-gray-600', !isEditMode);
+    function openItem(el) {
+        const id = el.dataset.id;
+        const name = el.dataset.name;
+        const category = el.dataset.category;
+        const quantity = el.dataset.quantity;
+        const price = el.dataset.price;
+        const image = el.dataset.image;
+
+        if (editMode) {
+            document.getElementById('editId').value = id;
+            document.getElementById('editName').value = name;
+            document.getElementById('editCategory').value = category;
+            document.getElementById('editQuantity').value = quantity;
+            document.getElementById('editPrice').value = price;
+            document.getElementById('editImagePreview').src = image;
+            document.getElementById('editForm').action = `/inventory/${id}`;
+            openModal('editModal');
+        } else {
+            document.getElementById('viewName').textContent = name;
+            document.getElementById('viewCategory').textContent = category;
+            document.getElementById('viewQuantity').textContent = quantity;
+            document.getElementById('viewPrice').textContent = parseFloat(price).toFixed(2);
+            document.getElementById('viewImage').src = image;
+            openModal('viewModal');
+        }
     }
 
-    function toggleImageInput() {
-        document.getElementById('editImageInput').classList.toggle('hidden');
-    }
-
-    inventoryItems.forEach(img => {
-        img.addEventListener('click', () => {
-            selectedItemId = img.dataset.id;
-
-            if (isEditMode) {
-                document.getElementById('editId').value = selectedItemId;
-                document.getElementById('editName').value = img.dataset.name;
-                document.getElementById('editCategory').value = img.dataset.category;
-                document.getElementById('editQuantity').value = img.dataset.quantity;
-                document.getElementById('editPrice').value = img.dataset.price;
-                document.getElementById('editImagePreview').src = img.dataset.image;
-                document.getElementById('editForm').action = `/inventory/${selectedItemId}`;
-                openModal('editModal');
-            } else {
-                document.getElementById('viewImage').src = img.src;
-                document.getElementById('viewName').textContent = img.dataset.name;
-                document.getElementById('viewCategory').textContent = img.dataset.category;
-                document.getElementById('viewQuantity').textContent = img.dataset.quantity;
-                document.getElementById('viewPrice').textContent = parseFloat(img.dataset.price).toFixed(2);
-                openModal('viewModal');
-            }
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.inventory-item').forEach(img => {
+            img.addEventListener('click', () => openItem(img));
         });
-    });
+        document.querySelectorAll('.list-view-info').forEach(row => {
+            row.addEventListener('click', () => openItem(row));
+        });
 
-    function submitDelete() {
-        openModal('confirmDeleteModal');
-    }
-
-    function confirmDelete() {
-        const deleteForm = document.getElementById('deleteForm');
-        deleteForm.action = `/inventory/${selectedItemId}`;
-        deleteForm.submit();
-    }
-
-    window.addEventListener('DOMContentLoaded', () => {
-        categoryButtons[0].click(); // Trigger "ALL" filter on page load
+        // Restore last view from localStorage
+        const savedView = localStorage.getItem('inventoryView');
+        if (savedView === 'list' && isGridView) toggleView(false);
     });
 </script>
 @endsection

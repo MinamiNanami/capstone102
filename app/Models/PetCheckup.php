@@ -2,23 +2,19 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class PetCheckup extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
-        'id',
         'pet_inventory_id',
+        'date',
+        'next_appointment',
         'disease',
         'diagnosis',
         'vital_signs',
         'treatment',
-        'history',
-        'diagnosed_by',
-        'timestamps',
+        'diagnosed_by'
     ];
 
     public function pet()

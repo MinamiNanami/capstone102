@@ -8,11 +8,10 @@ class Schedule extends Model
 {
 
     public $timestamps = false;
-    
-    protected $fillable = ['title', 'date', 'description', 'time']; // Make sure these match your DB
+
+    protected $fillable = ['title', 'customer_name', 'phone_number', 'date', 'description', 'time']; // Make sure these match your DB
 
     protected $casts = [
         'date' => 'datetime',
     ];
 }
-

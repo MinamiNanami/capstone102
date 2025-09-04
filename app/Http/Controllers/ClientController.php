@@ -7,6 +7,12 @@ use App\Models\PetInventory;
 
 class ClientController extends Controller
 {
+    public function index()
+    {
+        $pets = PetInventory::orderBy('updated_at', 'desc')->get();
+        return view('registered', compact('pets'));
+    }
+
     public function updateCheckup(Request $request)
     {
         $request->validate([
@@ -16,6 +22,7 @@ class ClientController extends Controller
             'vital_signs' => 'nullable|string',
             'treatment' => 'nullable|string',
             'history' => 'nullable|string',
+            'next_appointment' => 'nullable|date',
         ]);
 
         $pet = PetInventory::findOrFail($request->id);

@@ -1,6 +1,7 @@
 @extends('layouts.default-layout')
 
 @section('content')
+
 <div class="w-full p-4">
     <h2 class="text-xl font-bold text-black mb-4">CLIENTS RECORDS</h2>
 
@@ -55,7 +56,7 @@
                     <td class="border p-2">{{ $patient->pet_name }}</td>
                     <td class="border p-2">{{ $patient->pet_type }}</td>
                     <td class="border p-2">{{ $patient->gender }}</td>
-                    <td class="border p-2">{{ $patient->disease }}</td>
+                    <td class="border p-2">{{ optional($patient->checkups->last())->disease ?? '-' }}</td>
                     <td class="border p-2 space-x-1">
                         <form method="GET" action="{{ route('registered') }}" class="inline">
                             <input type="hidden" name="show" value="{{ $patient->id }}">
@@ -91,7 +92,7 @@
 @if(request('show'))
 @php
 $selected = $patients->where('id', request('show'))->first();
-$checkups = $selected->checkups ?? [];
+$checkups = $selected->checkups ?? collect();
 @endphp
 
 <div class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -117,6 +118,7 @@ $checkups = $selected->checkups ?? [];
             <thead class="bg-gray-100">
                 <tr>
                     <th class="border p-2">Date</th>
+                    <th class="border p-2">Next Appointment</th>
                     <th class="border p-2">Disease</th>
                     <th class="border p-2">Diagnosis</th>
                     <th class="border p-2">Vital Signs</th>
@@ -125,24 +127,21 @@ $checkups = $selected->checkups ?? [];
                 </tr>
             </thead>
             <tbody>
+                @forelse($checkups as $checkup)
                 <tr>
-                    <td class="border p-2">{{ $selected->created_at->format('Y-m-d') }}</td>
-                    <td class="border p-2">{{ $selected->disease }}</td>
-                    <td class="border p-2">{{ $selected->diagnosis }}</td>
-                    <td class="border p-2">{{ $selected->vital_signs }}</td>
-                    <td class="border p-2">{{ $selected->treatment }}</td>
-                    <td class="border p-2">{{ $selected->diagnosed_by }}</td>
-                </tr>
-                @foreach($selected->checkups as $checkup)
-                <tr>
-                    <td class="border p-2">{{ $checkup->created_at->format('Y-m-d') }}</td>
+                    <td class="border p-2">{{ $checkup->created_at->format('Y-m-d H:i') }}</td>
+                    <td class="border p-2">{{ $checkup->next_appointment ? \Carbon\Carbon::parse($checkup->next_appointment)->format('Y-m-d H:i') : '-' }}</td>
                     <td class="border p-2">{{ $checkup->disease }}</td>
                     <td class="border p-2">{{ $checkup->diagnosis }}</td>
                     <td class="border p-2">{{ $checkup->vital_signs }}</td>
                     <td class="border p-2">{{ $checkup->treatment }}</td>
                     <td class="border p-2">{{ $checkup->diagnosed_by }}</td>
                 </tr>
-                @endforeach
+                @empty
+                <tr>
+                    <td colspan="7" class="border p-2 text-center text-gray-500">No check-up records found.</td>
+                </tr>
+                @endforelse
             </tbody>
         </table>
 
@@ -150,22 +149,37 @@ $checkups = $selected->checkups ?? [];
         <form method="POST" action="{{ route('registered.checkup.store') }}" class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             @csrf
             <input type="hidden" name="pet_inventory_id" value="{{ $selected->id }}">
+
+            <div>
+                <label>Date</label>
+                <input type="date" name="date" value="{{ date('Y-m-d') }}" required class="w-full border p-2 rounded">
+            </div>
+
+            <div>
+                <label>Next Appointment</label>
+                <input type="datetime-local" name="next_appointment" class="w-full border p-2 rounded">
+            </div>
+
             <div>
                 <label>Disease</label>
                 <input type="text" name="disease" class="w-full border p-2 rounded" required>
             </div>
+
             <div>
                 <label>Diagnosis</label>
                 <input type="text" name="diagnosis" class="w-full border p-2 rounded">
             </div>
+
             <div>
                 <label>Vital Signs</label>
                 <input type="text" name="vital_signs" class="w-full border p-2 rounded">
             </div>
+
             <div>
                 <label>Treatment</label>
                 <input type="text" name="treatment" class="w-full border p-2 rounded">
             </div>
+
             <div>
                 <label>Diagnosed By</label>
                 <select name="diagnosed_by" class="w-full border p-2 rounded" required>
@@ -180,7 +194,6 @@ $checkups = $selected->checkups ?? [];
                     Save Check-Up
                 </button>
             </div>
-
         </form>
     </div>
 </div>
@@ -189,23 +202,18 @@ $checkups = $selected->checkups ?? [];
 {{-- JS for modal and filter --}}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // ESC to close modals
         document.addEventListener('keydown', function(e) {
             if (e.key === "Escape") {
                 document.querySelectorAll('.modal').forEach(modal => modal.classList.add('hidden'));
             }
         });
 
-        // Close modal on click outside content
         document.querySelectorAll('.modal').forEach(modal => {
             modal.addEventListener('click', function(e) {
-                if (e.target === modal) {
-                    modal.classList.add('hidden');
-                }
+                if (e.target === modal) modal.classList.add('hidden');
             });
         });
 
-        // Reset filters
         const resetBtn = document.getElementById('reset-filters');
         if (resetBtn) {
             resetBtn.addEventListener('click', function() {

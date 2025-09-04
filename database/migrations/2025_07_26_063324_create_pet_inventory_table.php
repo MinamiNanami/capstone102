@@ -28,12 +28,7 @@ return new class extends Migration
             $table->string('gender');
             $table->date('birthday')->nullable();
             $table->string('markings')->nullable();
-            $table->string('disease')->nullable();
             $table->text('history')->nullable();
-            $table->text('diagnosis')->nullable();
-            $table->text('vital_signs')->nullable();
-            $table->text('treatment')->nullable();
-            $table->text('diagnosed_by');
             $table->timestamps();
         });
     }

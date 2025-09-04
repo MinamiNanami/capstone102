@@ -131,7 +131,7 @@
                                         Profile Settings
                                     </a>
                                 </li>
-                                <li>
+                                <li class="hidden">
                                     <button
                                         class="flex items-center text-lg font-bold text-black hover:text-blue-700 hover:bg-blue-300 p-2 rounded hover:cursor-pointer w-full"
                                         id="darkModeToggle">
@@ -266,7 +266,7 @@
                                         Profile Settings
                                     </a>
                                 </li>
-                                <li>
+                                <li class="hidden">
                                     <button
                                         class="flex items-center text-lg font-bold text-black hover:text-blue-700 hover:bg-blue-300 p-2 rounded hover:cursor-pointer w-full"
                                         id="darkModeToggleMobile">

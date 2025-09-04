@@ -13,12 +13,14 @@ return new class extends Migration
     {
         Schema::create('pet_checkups', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('pet_inventory_id');
+            $table->unsignedBigInteger('pet_inventory_id')->constrained('pet_inventory')->onDelete('cascade');
+            $table->date('date')->nullable();
             $table->string('disease')->nullable();
             $table->string('diagnosis')->nullable();
             $table->string('vital_signs')->nullable();
             $table->string('treatment')->nullable();
             $table->string('diagnosed_by')->nullable();
+            $table->dateTime('next_appointment')->nullable();
             $table->text('history')->nullable();
             $table->timestamps();
 
