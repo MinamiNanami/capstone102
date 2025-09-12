@@ -11,7 +11,6 @@ class InventoryController extends Controller
     public function index()
     {
         $items = InventoryItem::all();
-
         return view('inventory', compact('items'));
     }
 
@@ -22,8 +21,14 @@ class InventoryController extends Controller
             'category' => 'required|string',
             'quantity' => 'required|integer',
             'price' => 'required|numeric',
+            'expiration_date' => 'nullable|string', // input type=month gives YYYY-MM
             'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
+
+        // Convert YYYY-MM into YYYY-MM-01
+        if (!empty($validated['expiration_date'])) {
+            $validated['expiration_date'] = $validated['expiration_date'] . '-01';
+        }
 
         if ($request->hasFile('image')) {
             $validated['image'] = $request->file('image')->store('inventory', 'public');
@@ -43,14 +48,24 @@ class InventoryController extends Controller
             'category' => 'required|string',
             'quantity' => 'required|integer',
             'price' => 'required|numeric',
+            'expiration_date' => 'nullable|string',
             'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
+        if (!empty($validated['expiration_date'])) {
+            $validated['expiration_date'] = $validated['expiration_date'] . '-01';
+        }
+
         if ($request->hasFile('image')) {
+            // delete old image
+            if ($item->image && Storage::exists('public/' . $item->image)) {
+                Storage::delete('public/' . $item->image);
+            }
             $validated['image'] = $request->file('image')->store('inventory', 'public');
         }
 
         $item->update($validated);
+
         return redirect()->back()->with('success', 'Item updated successfully.');
     }
 
@@ -58,7 +73,6 @@ class InventoryController extends Controller
     {
         $item = InventoryItem::findOrFail($id);
 
-        // Optional: delete image from storage if needed
         if ($item->image && Storage::exists('public/' . $item->image)) {
             Storage::delete('public/' . $item->image);
         }

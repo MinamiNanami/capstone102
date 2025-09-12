@@ -13,6 +13,7 @@ class Transaction extends Model
         'customer_name',
         'total',
         'pos_sale_id',
+        'service',
     ];
 
     public function items()

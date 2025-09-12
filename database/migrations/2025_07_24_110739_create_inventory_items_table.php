@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('category');
+            $table->date('expiration_date')->nullable();
             $table->string('image')->nullable(); // path to image
             $table->integer('quantity')->default(0);
             $table->decimal('price', 8, 2)->default(0.00);

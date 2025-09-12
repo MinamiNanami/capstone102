@@ -21,8 +21,6 @@ return new class extends Migration
             $table->time('time');
             $table->date('next_appointment')->nullable();
             $table->timestamps(); //  created_at and updated_at
-
-            $table->unique(['date', 'time'], 'unique_date_time');
         });
     }
 

@@ -97,7 +97,7 @@
 
             <textarea name="history"
                 class="p-2 border border-gray-300 rounded w-full mb-4 resize-none bg-white text-black"
-                placeholder="Enter additional information..." rows="3"></textarea>
+                placeholder="Enter Medical History..." rows="3"></textarea>
 
             
 

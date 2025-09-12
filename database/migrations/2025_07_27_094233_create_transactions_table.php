@@ -9,10 +9,11 @@ return new class extends Migration {
     {
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
-            $table->string('customer_name')->nullable();  // ✅ must be "customer_name"
+            $table->string('customer_name')->nullable();   // Customer name
+            $table->string('service')->nullable();         // ✅ Service type (Check-up, Surgery, etc.)
             $table->decimal('service_fee', 10, 2)->default(0);
-            $table->decimal('discount', 10, 2)->default(0);
-            $table->decimal('total', 10, 2)->default(0);
+            $table->decimal('discount', 5, 2)->default(0); // ✅ % discount
+            $table->decimal('total', 10, 2)->default(0);   // ✅ final total
             $table->timestamps();
         });
     }

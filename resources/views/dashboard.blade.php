@@ -7,15 +7,17 @@
 
             <h1 class="text-3xl font-bold mb-4">Analytics Dashboard</h1>
 
+            {{-- Main Dashboard Grid --}}
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
 
-                <!-- Daily Sale Card -->
+                {{-- Daily Sale / Daily Clients / Expiring Items --}}
                 <div
                     id="dailySaleCard"
                     class="bg-white p-6 rounded-lg shadow-md flex flex-col justify-between cursor-pointer hover:bg-gray-50 transition">
+
                     <div>
                         <h2 class="text-xl font-bold mb-4">Daily Sale</h2>
-                        <p class="text-gray-700 text-2xl">
+                        <p class="text-gray-700 text-4xl">
                             ₱ {{ $totalDailySales }}
                             @if($totalDailySales > $totalPreviousDaySales)
                             <i class="fas fa-arrow-up text-green-500 ml-2"></i>
@@ -24,46 +26,63 @@
                             @endif
                         </p>
                     </div>
-                    <div>
-                        <h2 class="text-xl font-bold mt-6 mb-4">Daily Clients</h2>
-                        <p class="text-gray-700 text-2xl">
+
+                    <div class="mt-6">
+                        <h2 class="text-xl font-bold mb-4">Daily Clients</h2>
+                        <p class="text-gray-700 text-4xl">
                             <i class="fas fa-user mr-2"></i>
                             {{ $totalDailyClients }}
                         </p>
                     </div>
+
+                    {{-- Expiring Inventory Items inside the card --}}
+                    <div class="mt-6">
+                        <h2 class="text-xl font-bold mb-3">Expiring Inventory Items (Next 30 Days)</h2>
+                        @if($expiringItems->isNotEmpty())
+                        <div class="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto">
+                            @foreach($expiringItems as $item)
+                            <div class="bg-yellow-100 p-2 rounded shadow flex justify-between items-center">
+                                <div>
+                                    <p class="font-semibold">{{ $item->name }}</p>
+                                    <p class="text-sm text-gray-700">Qty: {{ $item->quantity }}</p>
+                                </div>
+                                <div class="text-sm font-semibold text-red-600">
+                                    Exp: {{ \Carbon\Carbon::parse($item->expiration_date)->format('M d, Y') }}
+                                </div>
+                            </div>
+                            @endforeach
+                        </div>
+                        @else
+                        <p class="text-gray-500 text-sm">No items expiring in the next 30 days.</p>
+                        @endif
+                    </div>
                 </div>
 
-                <!-- Upcoming Appointments Card -->
+                {{-- Today's Appointments --}}
                 <div class="bg-white p-6 rounded-lg shadow-md">
                     @php
                     use Illuminate\Support\Carbon;
 
-                    // Get next 5 upcoming schedules
-                    $upcomingSchedules = $schedules
-                        ->filter(fn($s) => Carbon::parse($s->date)->isFuture())
-                        ->sortBy('date')
-                        ->take(6);
+                    $todaySchedules = $schedules
+                    ->filter(fn($s) => Carbon::parse($s->date)->isToday())
+                    ->sortBy('time');
                     @endphp
 
-                    <h2 class="text-xl font-bold mb-4">Upcoming Appointments</h2>
+                    <h2 class="text-xl font-bold mb-4">Today's Appointments</h2>
 
-                    @if ($upcomingSchedules->isNotEmpty())
+                    @if ($todaySchedules->isNotEmpty())
                     <div class="overflow-x-auto">
                         <table class="min-w-full text-sm text-left text-gray-700">
                             <thead class="bg-gray-100 font-semibold text-gray-900">
                                 <tr>
                                     <th class="px-4 py-2">Title</th>
-                                    <th class="px-4 py-2">Date</th>
                                     <th class="px-4 py-2">Time</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($upcomingSchedules as $schedule)
+                                @foreach ($todaySchedules as $schedule)
                                 <tr class="border-t">
                                     <td class="px-4 py-2">{{ $schedule->title }}</td>
-                                    <td class="px-4 py-2">
-                                        {{ Carbon::parse($schedule->date)->format('F j, Y') }}
-                                    </td>
                                     <td class="px-4 py-2">
                                         {{ $schedule->time ? Carbon::parse($schedule->time)->format('g:i A') : 'N/A' }}
                                     </td>
@@ -73,7 +92,7 @@
                         </table>
                     </div>
                     @else
-                    <p class="text-gray-500 text-sm">No upcoming schedules.</p>
+                    <p class="text-gray-500 text-sm">No appointments today.</p>
                     @endif
                 </div>
 
@@ -85,7 +104,6 @@
     </div>
 </div>
 
-<!-- Transactions Modal -->
 <div id="transactionsModal" class="fixed inset-0 bg-black bg-opacity-50 hidden justify-center items-center z-50 overflow-auto p-4">
     <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto relative">
         <button onclick="closeTransactionModal()" class="absolute top-2 right-2 text-gray-600 hover:text-gray-900 text-3xl font-bold leading-none">&times;</button>
@@ -140,7 +158,7 @@
 
             html += `
                 <div 
-                    class="bg-gray-100 rounded shadow p-3 border flex justify-between items-center cursor-pointer hover:bg-gray-200"
+                    class="bg-gray-100 rounded shadow p-3 border flex justify-between items-center cursor-pointer hover:bg-gray-200 mb-2"
                     onclick="showReceiptModal(this)"
                     data-name="${tx.customer_name}"
                     data-date="${createdAt}"
@@ -156,18 +174,33 @@
             `;
         });
 
-        // Overall items summary
-        html += `<div class="mt-4 border-t pt-4">
-                    <h3 class="font-bold mb-2">Overall Items Sold:</h3>
-                    <ul class="list-disc pl-5">`;
-        for (const [itemName, qty] of Object.entries(overallItems)) {
-            html += `<li>${qty}x ${itemName}</li>`;
-        }
-        html += `</ul>
-                <div class="mt-4 text-right font-bold text-xl">
+        // Modern Overall Items Sold table
+        html += `
+            <div class="mt-6">
+                <h3 class="font-bold text-lg mb-2">Overall Items Sold:</h3>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full bg-white border border-gray-200 text-gray-700">
+                        <thead class="bg-gray-100 border-b border-gray-200">
+                            <tr>
+                                <th class="px-4 py-2 text-left">Item Name</th>
+                                <th class="px-4 py-2 text-right">Quantity Sold</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${Object.entries(overallItems).map(([itemName, qty]) => `
+                                <tr class="border-b hover:bg-gray-50">
+                                    <td class="px-4 py-2">${itemName}</td>
+                                    <td class="px-4 py-2 text-right font-semibold">${qty}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="mt-4 text-right font-bold text-xl text-green-600">
                     Total of All Transactions: ₱${totalAllTransactions.toFixed(2)}
                 </div>
-            </div>`;
+            </div>
+        `;
 
         document.getElementById('transactionsList').innerHTML = html;
         showModal();
@@ -185,58 +218,6 @@
         modal.classList.add('hidden');
     }
 
-    function showReceiptModal(el) {
-        const date = el.dataset.date;
-        const customer = el.dataset.name;
-        const itemsString = el.dataset.items || '';
-        const total = el.dataset.total || '0.00';
-
-        const itemsArray = itemsString.split(';').map(line => line.trim()).filter(line => line);
-
-        let receiptTable = `
-            <table class="w-full text-sm border-t border-b mb-2">
-                <thead>
-                    <tr>
-                        <th class="text-left py-1">QTY</th>
-                        <th class="text-left py-1">ITEM</th>
-                        <th class="text-right py-1">TOTAL</th>
-                    </tr>
-                </thead>
-                <tbody>
-        `;
-
-        itemsArray.forEach(line => {
-            const match = line.match(/^(\d+)x\s(.+?)\s-\s₱([\d,.]+)/);
-            if (match) {
-                const qty = parseInt(match[1]);
-                const name = match[2];
-                const itemTotal = parseFloat(match[3].replace(/,/g, ''));
-                receiptTable += `
-                    <tr>
-                        <td class="py-1">${qty}</td>
-                        <td class="py-1">${name}</td>
-                        <td class="py-1 text-right">₱${itemTotal.toFixed(2)}</td>
-                    </tr>
-                `;
-            }
-        });
-
-        receiptTable += `
-                </tbody>
-            </table>
-        `;
-
-        alert(
-            `Transaction Receipt\n\n` +
-            `Date: ${date}\n` +
-            `Customer: ${customer}\n\n` +
-            `Items:\n` +
-            itemsArray.map(line => '- ' + line).join('\n') + `\n\n` +
-            `Total: ₱${total}`
-        );
-    }
-
-    // Daily Transactions fetch
     document.getElementById('dailySaleCard').addEventListener('click', () => {
         fetch('/api/transactions/daily')
             .then(res => res.json())

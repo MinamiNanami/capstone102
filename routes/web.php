@@ -32,6 +32,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/registered', [PetInventoryController::class, 'showPatients'])->name('registered');
     Route::post('/registered/update', [PetInventoryController::class, 'updateMedicalInfo'])->name('registered.update');
     Route::post('/registered/checkup', [PetInventoryController::class, 'storeCheckup'])->name('registered.checkup.store');
+    Route::post('/registered/history/store', [PetInventoryController::class, 'storeHistory'])->name('registered.history.store');
+
 
 
     Route::get('/registerpet', function () {

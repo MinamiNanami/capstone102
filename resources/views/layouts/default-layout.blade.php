@@ -49,7 +49,7 @@
 
 <body class="bg-blue-100 text-gray-900">
     <div class="flex flex-col md:flex-row h-screen">
-        <!-- Sidebar -->
+
         <div class="hidden md:block w-full md:w-1/4 bg-blue-500 p-4 sticky top-0 h-screen">
             <div class="flex flex-col items-center">
                 <img alt="Company Logo" class="mb-4 rounded-full w-24 h-24 md:w-48 md:h-48" height="200"
@@ -157,7 +157,7 @@
                 </nav>
             </div>
         </div>
-        <!-- Logout Modal -->
+
         <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 hidden" id="logoutModal">
             <div class="bg-white p-6 rounded-md shadow-md">
                 <h2 class="text-xl font-bold mb-4">
@@ -169,20 +169,20 @@
                         onclick="closeLogoutModal()">
                         Cancel
                     </button>
-                    <!-- Log Out Button -->
+
                     <button class="bg-red-500 text-black px-4 py-2 rounded hover:bg-red-400"
                         onclick="document.getElementById('logoutForm').submit()">
                         Log Out
                     </button>
 
-                    <!-- Hidden logout form -->
+
                     <form id="logoutForm" action="{{ route('logout') }}" method="POST" class="hidden">
                         @csrf
                     </form>
                 </div>
             </div>
         </div>
-        <!-- Mobile Sidebar -->
+
         <div class="fixed top-0 left-0 h-full w-0 bg-blue-500 overflow-x-hidden z-50" id="mySidenav">
             <a class="absolute top-0 right-0 mt-4 mr-4 text-3xl" href="javascript:void(0)" onclick="closeNav()">
                 ×
@@ -293,7 +293,6 @@
             </div>
         </div>
 
-        <!-- Dark Mode Friendly Loading Buffer -->
         <div id="loader"
             class="fixed inset-0 z-[9999] flex items-center justify-center bg-white transition-opacity duration-300">
             <div
@@ -301,7 +300,7 @@
             </div>
         </div>
 
-        <!-- Mobile Header -->
+
         <div class="sticky top-0 bg-blue-500 z-10 h-12 flex items-center" id="stickyHeader">
             <div class="flex justify-between items-center h-12">
                 <div class="flex items-center h-12">
@@ -313,7 +312,6 @@
         </div>
         <div class="w-full p-3">
 
-            <!-- Main content goes here -->
             <div class="bg-gray-100 rounded-md">
                 @yield('content')
             </div>

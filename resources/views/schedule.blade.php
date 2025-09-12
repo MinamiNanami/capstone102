@@ -9,14 +9,14 @@
     }
 </style>
 
-<!-- Sticky Header -->
+
 <div class="sticky top-0 bg-blue-500 z-10 h-12 flex items-center" id="stickyHeader">
     <div class="flex justify-between items-center h-12 w-full px-4">
-        <!-- Left: menu icon -->
+
         <div class="flex items-center h-12">
             <span class="bg-blue-500 p-2 rounded-md text-3xl cursor-pointer md:hidden h-12 flex items-center"></span>
         </div>
-        <!-- Right: date input, search, add -->
+
         <div class="flex items-center space-x-2">
             <input class="border border-gray-300 rounded px-2 py-1" id="date-picker" type="date" />
             <button class="text-white text-xl" id="search-btn" title="Search by Date">
@@ -54,7 +54,6 @@
         </div>
     </div>
 
-    <!-- Hidden schedule data -->
     <div id="schedule-data" class="hidden">
         @foreach ($schedules as $s)
         <div class="event"
@@ -66,9 +65,9 @@
         @endforeach
     </div>
 
-    <!-- Add Schedule Modal -->
+
     <div id="addEventModal" class="fixed inset-0 bg-black bg-opacity-50 hidden justify-center items-center z-50">
-        <div class="bg-white rounded-lg p-6 w-full max-w-md">
+        <div class="bg-white rounded-lg p-6 w-full max-w-md" onclick="event.stopPropagation()">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-xl font-bold">Add Schedule</h2>
                 <button onclick="closeModal('addEventModal')" class="text-gray-500 hover:text-red-500 text-2xl">&times;</button>
@@ -107,20 +106,20 @@
         </div>
     </div>
 
-    <!-- Day View Modal -->
+
     <div id="dayEventModal" class="fixed inset-0 bg-black bg-opacity-50 hidden justify-center items-center z-50">
-        <div class="bg-white rounded-lg p-6 w-[95%] max-w-[1400px] max-h-[90vh] overflow-y-auto">
+        <div class="bg-white rounded-lg p-6 w-[95%] max-w-[1400px] max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-xl font-bold" id="dayEventDate"></h2>
                 <button onclick="closeModal('dayEventModal')" class="text-gray-500 hover:text-red-500 text-2xl">&times;</button>
             </div>
-            <div class="relative border-l border-gray-300 h-[1040px]" id="timeline">
-                @for ($halfHour = 6 * 2; $halfHour <= 18 * 2; $halfHour++)
+            <div class="relative border-l border-gray-300 h-[1920px]" id="timeline">
+                @for ($halfHour = 0; $halfHour < 24 * 2; $halfHour++)
                     @php
                     $hour=floor($halfHour / 2);
                     $minute=($halfHour % 2) * 30;
                     $label=($hour % 12===0 ? 12 : $hour % 12) . ':' . str_pad($minute, 2, '0' , STR_PAD_LEFT) . ' ' . ($hour>= 12 ? 'PM' : 'AM');
-                    $top = (($hour - 6) * 80) + ($minute * (80 / 60));
+                    $top = ($hour * 80) + ($minute * (80 / 60));
                     @endphp
                     <div class="absolute left-0 flex items-center w-full text-xs text-gray-500" style="top: {{ $top }}px; height: 40px;">
                         <div class="w-24 text-right pr-2 font-semibold">{{ $label }}</div>
@@ -132,9 +131,9 @@
         </div>
     </div>
 
-    <!-- View Description Modal (NEW) -->
+
     <div id="viewDescriptionModal" class="fixed inset-0 bg-black bg-opacity-50 hidden justify-center items-center z-50">
-        <div class="bg-white rounded-lg p-6 w-full max-w-md">
+        <div class="bg-white rounded-lg p-6 w-full max-w-md" onclick="event.stopPropagation()">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-xl font-bold" id="viewTitle"></h2>
                 <button onclick="closeModal('viewDescriptionModal')" class="text-gray-500 hover:text-red-500 text-2xl">&times;</button>
@@ -143,10 +142,10 @@
         </div>
     </div>
 
-    <!-- Success / Error Messages -->
+
     @if(session('success'))
-    <div id="successModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-        <div class="bg-green-500 text-white rounded-lg p-6 w-full max-w-md text-center">
+    <div id="successModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50" onclick="closeModal('successModal')">
+        <div class="bg-green-500 text-white rounded-lg p-6 w-full max-w-md text-center" onclick="event.stopPropagation()">
             {{ session('success') }}
         </div>
     </div>
@@ -156,8 +155,8 @@
     @endif
 
     @if ($errors->any())
-    <div id="errorModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-        <div class="bg-red-500 text-white rounded-lg p-6 w-full max-w-md text-center">
+    <div id="errorModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50" onclick="closeModal('errorModal')">
+        <div class="bg-red-500 text-white rounded-lg p-6 w-full max-w-md text-center" onclick="event.stopPropagation()">
             {{ $errors->first() }}
         </div>
     </div>
@@ -175,14 +174,21 @@
         let currentYear = todayDate.getFullYear();
 
         function openModal(id) {
-            document.getElementById(id).classList.remove('hidden');
-            document.getElementById(id).classList.add('flex');
+            const modal = document.getElementById(id);
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
         }
 
         function closeModal(id) {
-            document.getElementById(id).classList.add('hidden');
-            document.getElementById(id).classList.remove('flex');
+            const modal = document.getElementById(id);
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
         }
+
+        // Close modal when clicking on overlay
+        document.querySelectorAll('[id$="Modal"]').forEach(modal => {
+            modal.addEventListener('click', () => closeModal(modal.id));
+        });
 
         function renderCalendar() {
             const calendarDays = document.getElementById('calendar-days');
@@ -232,7 +238,7 @@
                 const [hourStr, minuteStr] = e.time.split(':');
                 const hour = parseInt(hourStr);
                 const minute = parseInt(minuteStr);
-                const top = ((hour - 6) * 80) + (minute * (80 / 60));
+                const top = (hour * 80) + (minute * (80 / 60));
 
                 const eventBlock = document.createElement('div');
                 eventBlock.className = 'absolute bg-blue-500 text-white text-xs p-2 rounded shadow-md';
@@ -295,4 +301,4 @@
 
         renderCalendar();
     </script>
-    @endsection
+@endsection
